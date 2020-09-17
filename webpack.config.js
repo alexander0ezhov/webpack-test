@@ -1,21 +1,21 @@
-const path = require('path');
-const webpack = require('webpack');
-const merge = require('webpack-merge');
+const path = require("path");
+const webpack = require("webpack");
+const merge = require("webpack-merge");
 
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const CompressionPlugin = require('compression-webpack-plugin');
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
+const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const CompressionPlugin = require("compression-webpack-plugin");
 
 const PATHS = {
-  src: path.join(__dirname, './src'),
-  public: path.join(__dirname, './public'),
-  dist: path.join(__dirname, './dist'),
-  static: 'static',
+  src: path.join(__dirname, "./src"),
+  public: path.join(__dirname, "./public"),
+  dist: path.join(__dirname, "./dist"),
+  static: "static",
 };
 
 const baseConfig = {
@@ -33,16 +33,16 @@ const baseConfig = {
     rules: [
       {
         test: /\.(png|jpg|gif|svg)$/,
-        loader: 'file',
+        loader: "file",
         options: {
-          name: '[name].[ext]',
+          name: "[name].[ext]",
         },
       },
       {
         test: /\.(woff(2)?|ttf|eot)/,
-        loader: 'file',
+        loader: "file",
         options: {
-          name: '[name].[ext]',
+          name: "[name].[ext]",
         },
       },
       {
@@ -50,14 +50,14 @@ const baseConfig = {
         use: [
           MiniCssExtractPlugin.loader,
           {
-            loader: 'css',
+            loader: "css",
             options: {
               modules: true,
               sourceMap: true,
             },
           },
           {
-            loader: 'sass',
+            loader: "sass",
             options: { sourceMap: true },
           },
         ],
@@ -65,18 +65,18 @@ const baseConfig = {
     ],
   },
   resolve: {
-    extensions: ['*', '.js', '.jsx'],
+    extensions: ["*", ".js", ".jsx"],
   },
   resolveLoader: {
-    moduleExtensions: ['-loader'],
+    moduleExtensions: ["-loader"],
   },
   optimization: {
     splitChunks: {
       cacheGroups: {
         vendor: {
-          name: 'vendors',
+          name: "vendors",
           test: /node_modules/,
-          chunks: 'all',
+          chunks: "all",
           enforce: true,
         },
       },
@@ -91,17 +91,17 @@ const baseConfig = {
     new HtmlWebpackPlugin({
       hash: false,
       template: `${PATHS.public}/index.html`,
-      filename: 'index.html',
+      filename: "index.html",
     }),
     new CopyWebpackPlugin([
-      { from: `${PATHS.src}/assets/images`, to: 'static/media' },
-      { from: `${PATHS.src}/assets/fonts`, to: 'static/fonts' },
+      { from: `${PATHS.src}/assets/images`, to: "static/media" },
+      { from: `${PATHS.src}/assets/fonts`, to: "static/fonts" },
     ]),
   ],
 };
 
 const devConfig = merge(baseConfig, {
-  mode: 'development',
+  mode: "development",
   devServer: {
     contentBase: `${baseConfig.externals.paths.dist}`,
     compress: true,
@@ -117,57 +117,80 @@ const devConfig = merge(baseConfig, {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel',
+          loader: "babel",
           options: {
             presets: ["@babel/preset-react", "@babel/preset-env"],
-            plugins: ["@babel/plugin-transform-react-jsx"]
-          }
+            plugins: ["@babel/plugin-transform-react-jsx"],
+          },
         },
       },
       {
+        test: /\.css$/,
+        use: [
+          {
+            loader: "style-loader",
+          },
+          {
+            loader: "css-loader",
+            options: { modules: true },
+          },
+          "postcss-loader",
+        ],
+      },
+      {
         test: /\.(png|svg|jpg|gif)$/,
-        loader: 'file',
+        loader: "file",
         options: {
-          name: '[name].[ext]',
+          name: "[name].[ext]",
         },
       },
     ],
   },
   plugins: [
     new webpack.SourceMapDevToolPlugin({
-      filename: '[file].map',
+      filename: "[file].map",
     }),
   ],
 });
 
 const prodConfig = merge(baseConfig, {
-  mode: 'production',
+  mode: "production",
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel',
+          loader: "babel",
           options: {
             presets: ["@babel/preset-react", "@babel/preset-env"],
-            plugins: ["@babel/plugin-transform-react-jsx"]
-          }
-        }
+            plugins: ["@babel/plugin-transform-react-jsx"],
+          },
+        },
+      },
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: "style-loader",
+          },
+          {
+            loader: "css-loader",
+            options: { modules: true },
+          },
+          "postcss-loader",
+        ],
       },
     ],
   },
   optimization: {
-    minimizer: [
-      new OptimizeCssAssetsPlugin(),
-      new TerserPlugin(),
-    ],
+    minimizer: [new OptimizeCssAssetsPlugin(), new TerserPlugin()],
   },
   plugins: [
     new BundleAnalyzerPlugin(),
     new CompressionPlugin({
       test: /\.js$|\.html$/,
-      filename: '[path].gz[query]',
+      filename: "[path].gz[query]",
       threshold: 10240,
     }),
   ],
@@ -175,13 +198,9 @@ const prodConfig = merge(baseConfig, {
 
 module.exports = (env, argv) => {
   switch (argv.mode) {
-    case 'production':
-      return prodConfig
+    case "production":
+      return prodConfig;
     default:
-      return devConfig
+      return devConfig;
   }
 };
-
-
-
-
